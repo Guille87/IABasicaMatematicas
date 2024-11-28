@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
-using UnityEngine.UI;
 
 // A very simplistic car driving on the x-z plane.
 
@@ -11,17 +9,12 @@ public class Drive : MonoBehaviour
     public GameObject fuel;
     bool autopilot = false;
     float tspeed = 2f;
-    float rspeed = 0.2f;
-
-    void Start()
-    {
-
-    }
+    // float rspeed = 0.2f;
 
     void AutoPilot()
     {
         CalculateAngle();
-        this.transform.position += this.transform.up * tspeed * Time.deltaTime;
+        transform.position += transform.up * tspeed * Time.deltaTime;
     }
 
     void CalculateAngle()
@@ -29,9 +22,10 @@ public class Drive : MonoBehaviour
         Vector3 tankForward = transform.up;
         Vector3 fuelDirection = fuel.transform.position - transform.position;
 
-        Debug.DrawRay(this.transform.position, tankForward * 10, Color.green, 5);
-        Debug.DrawRay(this.transform.position, fuelDirection, Color.red, 5);
+        Debug.DrawRay(transform.position, tankForward * 10, Color.green, 5);
+        Debug.DrawRay(transform.position, fuelDirection, Color.red, 5);
 
+        /*
         float dot = tankForward.x * fuelDirection.x + tankForward.y * fuelDirection.y;
         float angle = Mathf.Acos(dot / (tankForward.magnitude * fuelDirection.magnitude));
 
@@ -43,26 +37,39 @@ public class Drive : MonoBehaviour
             clockwise = -1;
 
         if((angle * Mathf.Rad2Deg) > 10)
-            this.transform.Rotate(0, 0, angle * Mathf.Rad2Deg * clockwise * rspeed);
+            transform.Rotate(0, 0, angle * Mathf.Rad2Deg * clockwise * rspeed);
+        */
 
+        // Hacer que el tanque mire hacia el combustible
+        Quaternion targetRotation = Quaternion.LookRotation(Vector3.forward, fuelDirection.normalized);
+
+        // Suavizar la rotación hacia la dirección del combustible
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
     }
 
-    Vector3 Cross(Vector3 v, Vector3 w)
+    /*Vector3 Cross(Vector3 v, Vector3 w)
     {
         float xMult = v.y * w.z - v.z * w.y;
         float yMult = v.x * w.z - v.z * w.x;
         float zMult = v.x * w.y - v.y * w.x;
 
-        return (new Vector3(xMult, yMult, zMult));
-    }
+        return new Vector3(xMult, yMult, zMult);
+    }*/
 
     float CalculateDistance()
     {
-        float distance = Mathf.Sqrt(Mathf.Pow(fuel.transform.position.x - transform.position.x,2) +
-                                    Mathf.Pow(fuel.transform.position.z - transform.position.z,2));
+        /*float distance = Mathf.Sqrt(Mathf.Pow(fuel.transform.position.x - transform.position.x,2) +
+                                    Mathf.Pow(fuel.transform.position.z - transform.position.z,2));*/
+        
+        float distance = Mathf.Sqrt(Mathf.Pow(fuel.transform.position.x - transform.position.x, 2) +
+                                    Mathf.Pow(fuel.transform.position.y - transform.position.y, 2));
 
-        Vector3 fuelPos = new Vector3(fuel.transform.position.x, 0, fuel.transform.position.z);
-        Vector3 tankPos = new Vector3(transform.position.x, 0, transform.position.z);
+        /*Vector3 fuelPos = new Vector3(fuel.transform.position.x, 0, fuel.transform.position.z);
+        Vector3 tankPos = new Vector3(transform.position.x, 0, transform.position.z);*/
+        
+        // Considerar solo las coordenadas X-Y del tanque y el combustible
+        Vector2 tankPos = new Vector2(transform.position.x, transform.position.y);
+        Vector2 fuelPos = new Vector2(fuel.transform.position.x, fuel.transform.position.y);
         float uDistance = Vector3.Distance(fuelPos, tankPos);
 
         Vector3 tankToFuel = fuelPos - tankPos;
